@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
@@ -9,18 +9,12 @@
   <!ENTITY rfc2119 PUBLIC '' 
   'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml'> 
 
-
   <!ENTITY RFC.3986     PUBLIC ""  
   "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml">
 
-
-
-
-
-
 ]>
 
-  <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+
   <?rfc toc="yes" ?>
   <?rfc symrefs="yes" ?>
   <?rfc sortrefs="yes"?>
@@ -64,42 +58,35 @@
           <code>95131</code>
           <country>US</country>
         </postal>
-        <email>Jeff.Hodges@PayPal.com</email>
+        <email>Jeff.Hodges@KingsMountain.com</email>
       </address>
     </author>
     
           <author fullname="John Levine" initials="J." surname="Levine">
-	 <organization>Taughannock Networks</organization>
+    <organization>Taughannock Networks</organization>
 
-	 <address>
-	    <postal>
-	       <street>PO Box 727</street>
-	       <city>Trumansburg</city>
-	       <code>14886</code>
-	       <region>NY</region>
-	    </postal>
-	    <phone>+1 831 480 2300</phone>
-	    <email>standards@taugh.com</email>
-	    <uri>http://jl.ly</uri>
-	 </address>
+    <address>
+       <postal>
+          <street>PO Box 727</street>
+          <city>Trumansburg</city>
+          <code>14886</code>
+          <region>NY</region>
+       </postal>
+       <phone>+1 831 480 2300</phone>
+       <email>standards@taugh.com</email>
+       <uri>http://jl.ly</uri>
+    </address>
       </author>
  
     <author initials="C." surname="Deccio" fullname="Casey Deccio">
       <organization>Verisign</organization>
       <address>
-        <postal>
-          <street></street>
-          <city></city>
-          <region></region>
-          <code></code>
-          <country></country>
-        </postal>
         <email>casey@deccio.net</email>
       </address>
     </author>
 
 
-    <date />
+    <date year="2015" month="January" day="7"/>
 
     <workgroup>IETF</workgroup>
 
@@ -293,7 +280,6 @@
       <t>
         <list style="hanging">
           <t hangText="HTTP state management cookies">
-            <vspace blankLines="1"/>
             The mechanism
             can be used to determine the scope for data sharing of
             HTTP state management cookies <xref target="RFC6265" />.
@@ -335,19 +321,19 @@
           
           
           <t hangText="DMARC science fiction use case">
-		    DMARC's current use of the PSL is to determine the 'Organizational 
-		    Domain'.. for use when discovering DMARC policy records.  PSL works 
-		    well enough for production environments in today's world.
+          DMARC's current use of the PSL is to determine the 'Organizational 
+          Domain'.. for use when discovering DMARC policy records.  PSL works 
+          well enough for production environments in today's world.
 
-			  However, after hearing about cross-domain requirements of cookies and 
-			  cross-domain security use cases in the browser, it strikes me that any 
-			  functionality (policy authority?) that allows domains to be linked would 
-			  be incredibly useful in the DMARC world, too.  DMARC?s requirement for
-				Identifier Alignment between SPF-authenticated domain, DKIM d=domain, 
-				and a message?s From: domain could be relaxed to include domains that 
-				were somehow associated via a policy authority.
+           However, after hearing about cross-domain requirements of cookies and 
+           cross-domain security use cases in the browser, it strikes me that any 
+           functionality (policy authority?) that allows domains to be linked would 
+           be incredibly useful in the DMARC world, too.  DMARC?s requirement for
+            Identifier Alignment between SPF-authenticated domain, DKIM d=domain, 
+            and a message?s From: domain could be relaxed to include domains that 
+            were somehow associated via a policy authority.
 
-	        This capability would be *very* nice to have at hand.
+           This capability would be *very* nice to have at hand.
 
           </t>
           
@@ -398,18 +384,18 @@
 
 <!-- BEGIN INCLUDED references file draft-sullivan-domain-origin-assert-03.xml-informative -->
 
-      &RFC.3986; <!--   <xref target="RFC3986"/>  --> 
+   <!--  &RFC.3986; --> <!--   <xref target="RFC3986"/>  --> 
 
 
-
+<!--
 <reference anchor='CABF-BRv1.2.3'>
 <front>
 <title>CA/Browser Forum Baseline Requirements for the Issuance and 
        Management of Publicly-Trusted Certificates, v.1.2.3</title>
 
 <author>
-	<organization>
-	 CA/Browser Forum
+   <organization>
+    CA/Browser Forum
     </organization>
 </author>
 
@@ -419,7 +405,7 @@
 <format type='TXT'
         target='https://cabforum.org/wp-content/uploads/BRv1.2.3.pdf' />
 </reference>
-
+-->
 
 
 <reference anchor='I-D.kucherawy-dmarc-base'>
@@ -432,7 +418,25 @@
 
 <date month='March' day='31' year='2013' />
 
-<abstract><t>The email ecosystem currently lacks a cohesive mechanism through which email senders and receivers can make use of multiple authentication protocols in an attempt to establish reliable domain identifiers.  This lack of cohesion prevents receivers from providing domain-specific feedback to senders regarding the accuracy of authentication deployments.  Inaccurate authentication deployments preclude receivers from safely taking deterministic action against email that fails authentication checks.  Finally, email senders do not have the ability to publish policies specifying actions that should be taken against email that fails multiple authentication checks.  This memo presents a proposal for a scalable mechanism by which an organization can express, using the Domain Name System, domain-level policies and preferences for message validation, disposition, and reporting with predictable and accurate results.  The enclosed proposal is not intended to introduce mechanisms that provide elevated delivery privilege of authenticated email.  The proposal presents a mechanism for policy distribution that enables a continuum of increasingly strict handling of messages that fail multiple authentication checks, from no action, through silent reporting, up to message rejection.</t></abstract>
+<abstract><t>
+     The email ecosystem currently lacks a cohesive mechanism through which email
+   senders and receivers can make use of multiple authentication protocols in an
+   attempt to establish reliable domain identifiers.  This lack of cohesion
+   prevents receivers from providing domain-specific feedback to senders regarding
+   the accuracy of authentication deployments.  Inaccurate authentication
+   deployments preclude receivers from safely taking deterministic action against
+   email that fails authentication checks.  Finally, email senders do not have the
+   ability to publish policies specifying actions that should be taken against
+   email that fails multiple authentication checks.  This memo presents a proposal
+   for a scalable mechanism by which an organization can express, using the Domain
+   Name System, domain-level policies and preferences for message validation,
+   disposition, and reporting with predictable and accurate results.  The enclosed
+   proposal is not intended to introduce mechanisms that provide elevated delivery
+   privilege of authenticated email.  The proposal presents a mechanism for policy
+   distribution that enables a continuum of increasingly strict handling of
+   messages that fail multiple authentication checks, from no action, through
+   silent reporting, up to message rejection.
+</t></abstract>
 
 </front>
 
@@ -453,7 +457,17 @@
 
 <date month='March' day='6' year='2012' />
 
-<abstract><t>This document defines the term "Public Suffix domain" as meaning a domain under which multiple parties that are unaffiliated with the owner of the Public Suffix domain may register subdomains.  Examples of Public Suffix domains include "org", "co.uk", "k12.wa.us" and "uk.com".  It also defines a file format that can be used to distribute information about such Public Suffix domains to relying parties.  As an example, this information is then used to limit which domains an Internet service can set HTTP cookies for, strengthening the rules already defined by the cookie specification.  This specification updates RFC 6265 [RFC6265] by defining the term "Public Suffix domain".</t></abstract>
+<abstract><t>
+   This document defines the term "Public Suffix domain" as meaning a domain under
+   which multiple parties that are unaffiliated with the owner of the Public Suffix
+   domain may register subdomains.  Examples of Public Suffix domains include
+   "org", "co.uk", "k12.wa.us" and "uk.com".  It also defines a file format that
+   can be used to distribute information about such Public Suffix domains to
+   relying parties.  As an example, this information is then used to limit which
+   domains an Internet service can set HTTP cookies for, strengthening the rules
+   already defined by the cookie specification.  This specification updates RFC
+   6265 [RFC6265] by defining the term "Public Suffix domain".
+</t></abstract>
 
 </front>
 
@@ -545,7 +559,7 @@
 </reference>
 
 
-
+<!--
 <reference anchor='RFC2181'>
 
 <front>
@@ -581,10 +595,10 @@
 <format type='HTML' octets='54106' target='http://xml.resource.org/public/rfc/html/rfc2181.html' />
 <format type='XML' octets='38931' target='http://xml.resource.org/public/rfc/xml/rfc2181.xml' />
 </reference>
+-->
 
 
-
-
+<!--
 <reference anchor='RFC2308'>
 
 <front>
@@ -604,45 +618,25 @@
 <keyword>DNS</keyword>
 <abstract>
 <t>
-
    [RFC1034] provided a description of how to cache negative responses.
-
    It however had a fundamental flaw in that it did not allow a name
-
    server to hand out those cached responses to other resolvers, thereby
-
    greatly reducing the effect of the caching.  This document addresses
-
    issues raise in the light of experience and replaces [RFC1034 Section
-
    4.3.4].
 </t>
 <t>
-
-
-
    Negative caching was an optional part of the DNS specification and
-
    deals with the caching of the non-existence of an RRset [RFC2181] or
-
    domain name.
-
 </t>
 <t>
-
-
    Negative caching is useful as it reduces the response time for
-
    negative answers.  It also reduces the number of messages that have
-
    to be sent between resolvers and name servers hence overall network
-
    traffic.  A large proportion of DNS traffic on the Internet could be
-
    eliminated if all resolvers implemented negative caching.  With this
-
    in mind negative caching should no longer be seen as an optional part
-
    of a DNS resolver.
 </t></abstract></front>
 
@@ -651,7 +645,9 @@
 <format type='HTML' octets='50045' target='http://xml.resource.org/public/rfc/html/rfc2308.html' />
 <format type='XML' octets='41491' target='http://xml.resource.org/public/rfc/xml/rfc2308.xml' />
 </reference>
+-->
 
+<!--
 <reference anchor='RFC2782'>
 
 <front>
@@ -696,23 +692,28 @@
 <seriesInfo name='RFC' value='2782' />
 <format type='TXT' octets='24013' target='http://www.rfc-editor.org/rfc/rfc2782.txt' />
 </reference>
+-->
 
-
-
+<!--
 <reference anchor='RFC3597'>
-
-<front>
-<title>Handling of Unknown DNS Resource Record (RR) Types</title>
-<author initials='A.' surname='Gustafsson' fullname='A. Gustafsson'>
-<organization /></author>
-<date year='2003' month='September' />
-<abstract>
-<t>Extending the Domain Name System (DNS) with new Resource Record (RR) types currently requires changes to name server software.  This document specifies the changes necessary to allow future DNS implementations to handle new RR types transparently. [STANDARDS-TRACK]</t></abstract></front>
-
-<seriesInfo name='RFC' value='3597' />
-<format type='TXT' octets='17559' target='http://www.rfc-editor.org/rfc/rfc3597.txt' />
+   <front>
+      <title>Handling of Unknown DNS Resource Record (RR) Types</title>
+      <author initials='A.' surname='Gustafsson' fullname='A. Gustafsson'>
+      <organization /></author>
+      <date year='2003' month='September' />
+      <abstract>
+      <t>
+        Extending the Domain Name System (DNS) with new Resource Record (RR) types
+        currently requires changes to name server software.  This document specifies the		
+        changes necessary to allow future DNS implementations to handle new RR types
+        transparently. [STANDARDS-TRACK]
+      </t>
+      </abstract>
+   </front>
+   <seriesInfo name='RFC' value='3597' />
+   <format type='TXT' octets='17559' target='http://www.rfc-editor.org/rfc/rfc3597.txt' />
 </reference>
-
+-->
 
 
 
@@ -732,7 +733,14 @@
 <organization /></author>
 <date year='2005' month='March' />
 <abstract>
-<t>The Domain Name System Security Extensions (DNSSEC) add data origin authentication and data integrity to the Domain Name System.  This document introduces these extensions and describes their capabilities and limitations.  This document also discusses the services that the DNS security extensions do and do not provide.  Last, this document describes the interrelationships between the documents that collectively describe DNSSEC. [STANDARDS-TRACK]</t></abstract></front>
+<t>
+The Domain Name System Security Extensions (DNSSEC) add data origin
+authentication and data integrity to the Domain Name System.  This document
+introduces these extensions and describes their capabilities and limitations.
+This document also discusses the services that the DNS security extensions do
+and do not provide.  Last, this document describes the interrelationships
+between the documents that collectively describe DNSSEC. [STANDARDS-TRACK]
+</t></abstract></front>
 
 <seriesInfo name='RFC' value='4033' />
 <format type='TXT' octets='52445' target='http://www.rfc-editor.org/rfc/rfc4033.txt' />
@@ -757,7 +765,17 @@
 <organization /></author>
 <date year='2005' month='March' />
 <abstract>
-<t>This document is part of a family of documents that describe the DNS Security Extensions (DNSSEC). The DNS Security Extensions are a collection of resource records and protocol modifications that provide source authentication for the DNS. This document defines the public key (DNSKEY), delegation signer (DS), resource record digital signature (RRSIG), and authenticated denial of existence (NSEC) resource records. The purpose and format of each resource record is described in detail, and an example of each resource record is given.&lt;/t>&lt;t> This document obsoletes RFC 2535 and incorporates changes from all updates to RFC 2535. [STANDARDS-TRACK]</t></abstract></front>
+<t>
+This document is part of a family of documents that describe the DNS Security
+Extensions (DNSSEC). The DNS Security Extensions are a collection of resource
+records and protocol modifications that provide source authentication for the
+DNS. This document defines the public key (DNSKEY), delegation signer (DS),
+resource record digital signature (RRSIG), and authenticated denial of existence
+(NSEC) resource records. The purpose and format of each resource record is
+described in detail, and an example of each resource record is
+given.&lt;/t>&lt;t> This document obsoletes RFC 2535 and incorporates changes
+from all updates to RFC 2535. [STANDARDS-TRACK]
+</t></abstract></front>
 
 <seriesInfo name='RFC' value='4034' />
 <format type='TXT' octets='63879' target='http://www.rfc-editor.org/rfc/rfc4034.txt' />
@@ -782,7 +800,16 @@
 <organization /></author>
 <date year='2005' month='March' />
 <abstract>
-<t>This document is part of a family of documents that describe the DNS Security Extensions (DNSSEC). The DNS Security Extensions are a collection of new resource records and protocol modifications that add data origin authentication and data integrity to the DNS. This document describes the DNSSEC protocol modifications. This document defines the concept of a signed zone, along with the requirements for serving and resolving by using DNSSEC. These techniques allow a security-aware resolver to authenticate both DNS resource records and authoritative DNS error indications.&lt;/t>&lt;t> This document obsoletes RFC 2535 and incorporates changes from all updates to RFC 2535. [STANDARDS-TRACK]</t></abstract></front>
+<t>This document is part of a family of documents that describe the DNS Security
+Extensions (DNSSEC). The DNS Security Extensions are a collection of new
+resource records and protocol modifications that add data origin authentication
+and data integrity to the DNS. This document describes the DNSSEC protocol
+modifications. This document defines the concept of a signed zone, along with
+the requirements for serving and resolving by using DNSSEC. These techniques
+allow a security-aware resolver to authenticate both DNS resource records and
+authoritative DNS error indications.&lt;/t>&lt;t> This document obsoletes RFC
+2535 and incorporates changes from all updates to RFC 2535.
+[STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='4035' />
 <format type='TXT' octets='130589' target='http://www.rfc-editor.org/rfc/rfc4035.txt' />
@@ -790,7 +817,7 @@
 
 
 
-
+<!--
 <reference anchor='RFC4395'>
 
 <front>
@@ -803,13 +830,18 @@
 <organization /></author>
 <date year='2006' month='February' />
 <abstract>
-<t>This document provides guidelines and recommendations for the definition of Uniform Resource Identifier (URI) schemes.  It also updates the process and IANA registry for URI schemes.  It obsoletes both RFC 2717 and RFC 2718.  This document specifies an Internet Best Current Practices for the Internet Community, and requests discussion and suggestions for improvements.</t></abstract></front>
+<t>This document provides guidelines and recommendations for the definition of
+Uniform Resource Identifier (URI) schemes.  It also updates the process and IANA
+registry for URI schemes.  It obsoletes both RFC 2717 and RFC 2718.  This
+document specifies an Internet Best Current Practices for the Internet
+Community, and requests discussion and suggestions for
+improvements.</t></abstract></front>
 
 <seriesInfo name='BCP' value='35' />
 <seriesInfo name='RFC' value='4395' />
 <format type='TXT' octets='31933' target='http://www.rfc-editor.org/rfc/rfc4395.txt' />
 </reference>
-
+-->
 
 
 
@@ -827,7 +859,12 @@
 <organization /></author>
 <date year='2008' month='March' />
 <abstract>
-<t>The Domain Name System Security (DNSSEC) Extensions introduced the NSEC resource record (RR) for authenticated denial of existence.  This document introduces an alternative resource record, NSEC3, which similarly provides authenticated denial of existence.  However, it also provides measures against zone enumeration and permits gradual expansion of delegation-centric zones. [STANDARDS-TRACK]</t></abstract></front>
+<t>The Domain Name System Security (DNSSEC) Extensions introduced the NSEC
+resource record (RR) for authenticated denial of existence.  This document
+introduces an alternative resource record, NSEC3, which similarly provides
+authenticated denial of existence.  However, it also provides measures against
+zone enumeration and permits gradual expansion of delegation-centric zones.
+[STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='5155' />
 <format type='TXT' octets='112338' target='http://www.rfc-editor.org/rfc/rfc5155.txt' />
@@ -839,14 +876,20 @@
 <reference anchor='RFC6125'>
 
 <front>
-<title>Representation and Verification of Domain-Based Application Service Identity within Internet Public Key Infrastructure Using X.509 (PKIX) Certificates in the Context of Transport Layer Security (TLS)</title>
+<title>Representation and Verification of Domain-Based Application Service
+Identity within Internet Public Key Infrastructure Using X.509 (PKIX)
+Certificates in the Context of Transport Layer Security (TLS)</title>
 <author initials='P.' surname='Saint-Andre' fullname='P. Saint-Andre'>
 <organization /></author>
 <author initials='J.' surname='Hodges' fullname='J. Hodges'>
 <organization /></author>
 <date year='2011' month='March' />
 <abstract>
-<t>Many application technologies enable secure communication between two entities by means of Internet Public Key Infrastructure Using X.509 (PKIX) certificates in the context of Transport Layer Security (TLS).  This document specifies procedures for representing and verifying the identity of application services in such interactions. [STANDARDS-TRACK]</t></abstract></front>
+<t>Many application technologies enable secure communication between two
+entities by means of Internet Public Key Infrastructure Using X.509 (PKIX)
+certificates in the context of Transport Layer Security (TLS).  This document
+specifies procedures for representing and verifying the identity of application
+services in such interactions. [STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='6125' />
 <format type='TXT' octets='136507' target='http://www.rfc-editor.org/rfc/rfc6125.txt' />
@@ -863,7 +906,13 @@
 <organization /></author>
 <date year='2011' month='April' />
 <abstract>
-<t>This document defines the HTTP Cookie and Set-Cookie header fields.  These header fields can be used by HTTP servers to store state (called cookies) at HTTP user agents, letting the servers maintain a stateful session over the mostly stateless HTTP protocol.  Although cookies have many historical infelicities that degrade their security and privacy, the Cookie and Set-Cookie header fields are widely used on the Internet.  This document obsoletes RFC 2965. [STANDARDS-TRACK]</t></abstract></front>
+<t>This document defines the HTTP Cookie and Set-Cookie header fields.  These
+header fields can be used by HTTP servers to store state (called cookies) at
+HTTP user agents, letting the servers maintain a stateful session over the
+mostly stateless HTTP protocol.  Although cookies have many historical
+infelicities that degrade their security and privacy, the Cookie and Set-Cookie
+header fields are widely used on the Internet.  This document obsoletes RFC
+2965. [STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='6265' />
 <format type='TXT' octets='79724' target='http://www.rfc-editor.org/rfc/rfc6265.txt' />
@@ -871,7 +920,7 @@
 
 
 
-
+<!--
 <reference anchor='RFC6335'>
 
 <front>
@@ -888,16 +937,27 @@
 <organization /></author>
 <date year='2011' month='August' />
 <abstract>
-<t>This document defines the procedures that the Internet Assigned Numbers Authority (IANA) uses when handling assignment and other requests related to the Service Name and Transport Protocol Port Number registry. It also discusses the rationale and principles behind these procedures and how they facilitate the long-term sustainability of the registry.&lt;/t>&lt;t> This document updates IANA's procedures by obsoleting the previous UDP and TCP port assignment procedures defined in Sections 8 and 9.1 of the IANA Allocation Guidelines, and it updates the IANA service name and port assignment procedures for UDP-Lite, the Datagram Congestion Control Protocol (DCCP), and the Stream Control Transmission Protocol (SCTP). It also updates the DNS SRV specification to clarify what a service name is and how it is registered. This memo documents an Internet Best Current Practice.</t></abstract></front>
+<t>This document defines the procedures that the Internet Assigned Numbers
+Authority (IANA) uses when handling assignment and other requests related to the
+Service Name and Transport Protocol Port Number registry. It also discusses the
+rationale and principles behind these procedures and how they facilitate the
+long-term sustainability of the registry.&lt;/t>&lt;t> This document updates
+IANA's procedures by obsoleting the previous UDP and TCP port assignment
+procedures defined in Sections 8 and 9.1 of the IANA Allocation Guidelines, and
+it updates the IANA service name and port assignment procedures for UDP-Lite,
+the Datagram Congestion Control Protocol (DCCP), and the Stream Control
+Transmission Protocol (SCTP). It also updates the DNS SRV specification to
+clarify what a service name is and how it is registered. This memo documents an
+Internet Best Current Practice.</t></abstract></front>
 
 <seriesInfo name='BCP' value='165' />
 <seriesInfo name='RFC' value='6335' />
 <format type='TXT' octets='79088' target='http://www.rfc-editor.org/rfc/rfc6335.txt' />
 </reference>
+-->
 
 
-
-
+<!--
 <reference anchor='RFC6672'>
 <front>
 <title>DNAME Redirection in the DNS</title>
@@ -907,12 +967,16 @@
 <organization /></author>
 <date year='2012' month='June' />
 <abstract>
-<t>The DNAME record provides redirection for a subtree of the domain name tree in the DNS.  That is, all names that end with a particular suffix are redirected to another part of the DNS.  This document obsoletes the original specification in RFC 2672 as well as updates the document on representing IPv6 addresses in DNS (RFC 3363). [STANDARDS-TRACK]</t></abstract></front>
+<t>The DNAME record provides redirection for a subtree of the domain name tree
+in the DNS.  That is, all names that end with a particular suffix are redirected
+to another part of the DNS.  This document obsoletes the original specification
+in RFC 2672 as well as updates the document on representing IPv6 addresses in
+DNS (RFC 3363). [STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='6672' />
 <format type='TXT' octets='45704' target='http://www.rfc-editor.org/rfc/rfc6672.txt' />
 </reference>
-
+-->
 
       <reference anchor='publicsuffix.org'> <!--  <xref target="publicsuffix.org"/>  --> 
         <front>
@@ -923,12 +987,12 @@
               Mozilla Foundation
               </organization>
           </author>
-	  <date />
+		     <date />
         </front>
         <seriesInfo name='also known as:' value='Effective TLD (eTLD) List' />
         <format type='TXT'  
           target='http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1' />
-
+			<annotation>https://publicsuffix.org/</annotation>
       </reference>
 
 <!-- END INCLUDED references file draft-sullivan-domain-origin-assert-03.xml-informative -->
@@ -940,8 +1004,50 @@
     </section>
 
     <section title="Change History">
-    <t>This is a -00 Internet-draft, but borrows from various prior works...  [[TODO: flesh out]]
+    <t>[this section to be removed by RFC-Editor prior to publication as an RFC]</t>
+    <t>This is a -00 Internet-draft, but borrows from various prior draft works, listed below, as well as from discussions on the mailing list. 
     </t>
+    
+    
+        
+    <t><list style="hanging">
+        <t hangText="Andrew Sullivan, Jeff Hodges: Asserting DNS Administrative 
+                     Boundaries Within DNS Zones">
+<list>
+          <t>http://tools.ietf.org/html/draft-sullivan-domain-policy-authority-01</t>
+          <t>https://github.com/equalsJeffH/dbound/blob/master/draft-sullivan-dbound-problem-statement-00.xml</t>
+          </list>
+        </t>
+
+      </list></t>
+    
+      <t><list style="hanging">
+        <t hangText="John Levine: Publishing Organization Boundaries in the DNS">
+<list>
+          <t>https://tools.ietf.org/html/draft-levine-orgboundary-02</t>
+          <t>https://github.com/equalsJeffH/dbound/blob/master/draft-levine-orgboundary-02.txt</t>
+          </list>
+        </t>
+
+      </list></t>
+    
+    
+    
+    <t><list style="hanging">
+        <t hangText="Casey Deccio, John Levine: Defining and Signaling
+                      Relationships Between Domains">
+<list>
+          <t>http://www.ietf.org/mail-archive/web/dbound/current/pdfwad2AxxkYo.pdf</t>
+           <t>http://www.ietf.org/mail-archive/web/dbound/current/msg00141.html</t>
+           <t>https://github.com/equalsJeffH/dbound/blob/master/deccio-dbound-problem_statement-v3.pdf?raw=true</t>
+           <t>https://github.com/equalsJeffH/dbound/blob/master/deccio-dbound-problem_statement-v3.txt</t>
+          </list>
+        </t>
+
+      </list></t>
+    
+    
+    
  <!--
       <t><list style="hanging">
         <t hangText="00 to 01:">
