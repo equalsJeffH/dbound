@@ -2,7 +2,6 @@ dbound
 ======
 
 Various documents relevant to the in-genesis IETF DBOUND working group. 
-[Note: this is my personal un-official repo.]
 
 See also: 
   mailing list & archives: https://www.ietf.org/mailman/listinfo/dbound
