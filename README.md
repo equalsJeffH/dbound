@@ -23,7 +23,6 @@ Other dbound WG-related docs (all expired):
 <br>
 
 - https://tools.ietf.org/html/draft-sullivan-domain-policy-authority
-<br>
 
 - https://tools.ietf.org/html/draft-levine-dbound-dns
 
