@@ -31,7 +31,7 @@ The most recent versions of the internet-drafts associated with the dbound WG ar
   - https://tools.ietf.org/html/draft-yao-dbound-dns-solution
 <br>
 
-The above docs, other than draft-sullivan-domain-policy-authority, can be located via this search:
+Canonical copies of the above docs, other than `draft-sullivan-domain-policy-authority`, can be located via this search:
 <br>
 
 - https://datatracker.ietf.org/doc/search?name=dbound&sort=&rfcs=on&activedrafts=on&olddrafts=on&author=&by=group&group=&area=&ad=&state=&substate=&irtfstate=&stream=
