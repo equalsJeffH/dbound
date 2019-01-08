@@ -17,7 +17,6 @@ The most recent versions of the internet-drafts associated with the dbound WG ar
 <br>
 
   - Problem statement I-D: https://datatracker.ietf.org/doc/draft-sullivan-dbound-problem-statement/
-<br>
 
   - specification I-Ds:
 
