@@ -3,7 +3,7 @@ dbound
 
 Various documents relevant to the now-CLOSED IETF DBOUND ("Domain Boundaries") working group (WG). 
 
-NOTE: This repo is INCOMPLETE and DOES NOT at this time (6-Jan-2019) contain the most recent versions of the docs!
+NOTE: This repo is incomplete in that it does not at this time (8-Jan-2019) contain all of the documents associated with the now-closed dbound working group.
 <br>
 <br>
 See also:
@@ -13,24 +13,24 @@ See also:
 - dbound WG charter and WG status: https://datatracker.ietf.org/wg/dbound/about/
 <br>
 
-The most recent rendered versions of the docs associated with the dbound WG are:
+The most recent versions of the internet-drafts associated with the dbound WG are (all expired):
 <br>
 
-- Problem statement I-D (expired): https://datatracker.ietf.org/doc/draft-sullivan-dbound-problem-statement/
+  - Problem statement I-D: https://datatracker.ietf.org/doc/draft-sullivan-dbound-problem-statement/
 <br>
 
-Other dbound WG-related docs (all expired):
+  - specification I-Ds:
 <br>
 
-- https://tools.ietf.org/html/draft-sullivan-domain-policy-authority
+  - https://tools.ietf.org/html/draft-sullivan-domain-policy-authority
 
-- https://tools.ietf.org/html/draft-levine-dbound-dns
+  - https://tools.ietf.org/html/draft-levine-dbound-dns
 
-- https://tools.ietf.org/html/draft-deccio-dbound-name-relationships
+  - https://tools.ietf.org/html/draft-deccio-dbound-name-relationships
+  
+  - https://tools.ietf.org/html/draft-deccio-dbound-organizational-domain-policy
 
-- https://tools.ietf.org/html/draft-deccio-dbound-organizational-domain-policy
-
-- https://tools.ietf.org/html/draft-yao-dbound-dns-solution
+  - https://tools.ietf.org/html/draft-yao-dbound-dns-solution
 <br>
 
 The above docs, other than draft-sullivan-domain-policy-authority, can be located via this search:
