@@ -1,0 +1,1198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" >
+
+  <?rfc toc="yes" ?>
+  <?rfc symrefs="yes" ?>
+  <?rfc sortrefs="yes"?>
+  <?rfc iprnotified="no" ?>
+  <?rfc strict="yes" ?>
+  <?rfc compact="yes" ?>
+  <?rfc subcompact="no"?>
+  <?rfc comments="yes"?>
+  <?rfc inline="yes"?>
+
+
+<rfc category="std" ipr="trust200902" docName="draft-sullivan-domain-policy-authority-02">
+
+  <front>
+
+    <title abbrev="Asserting DNS Boundaries">
+      Asserting DNS Administrative Boundaries Within DNS Zones
+    </title>
+
+    <author initials="A." surname="Sullivan" fullname="Andrew Sullivan">
+      <organization>Dyn, Inc.</organization>
+      <address>
+        <postal>
+          <street>150 Dow St</street>
+          <city>Manchester</city>
+          <region>NH</region>
+          <code>03101</code>
+          <country>U.S.A.</country>
+        </postal>
+        <email>asullivan@dyn.com</email>
+      </address>
+    </author>
+
+    <author initials="J." surname="Hodges" fullname="Jeff Hodges">
+      <organization>PayPal</organization>
+      <address>
+        <postal>
+          <street>2211 North First Street</street>
+          <city>San Jose</city>
+          <region>California</region>
+          <code>95131</code>
+          <country>US</country>
+        </postal>
+        <email>Jeff.Hodges@PayPal.com</email>
+      </address>
+    </author>
+
+    <date />
+
+    <workgroup>IETF</workgroup>
+
+    <abstract>
+      <t>
+        Some entities on the Internet make inferences about the
+        administrative relationships among Internet services based on
+        the domain names at which those services are offered.  At
+        present, it is not possible to ascertain organizational
+        administrative boundaries in the DNS; therefore such
+        inferences can be erroneous.  Mitigation strategies deployed
+        so far will not scale.  This memo provides a means to make
+        explicit assertions regarding certain kinds of administrative
+        relationships between domain names.
+      </t>
+    </abstract>
+
+  </front>
+
+
+  <middle>
+
+    <section title="Introduction and Motivation" anchor="sec_motivation">
+      <t>Many Internet resources and services, especially at the
+      application layer, are identified primarily by domain names
+      <xref target="RFC1034"/>. As a result, domain names have become
+      fundamental elements in building security policies and also in
+      affecting user agent behaviour.  Discussion of several of these
+      uses, and some of the associated issues can be found in <xref
+      target="I-D.sullivan-dbound-problem-statement" />.</t>
+
+      <t>Historically, attempts to build the security policies have
+      relied on the public suffix list (see discussion in <xref
+      target="I-D.sullivan-dbound-problem-statement" />).  We proceed
+      from the view that some uses of the public-suffix list never
+      were going to achieve their goal, and that the public/private
+      distinction may be a poor proxy for the kinds of relationships
+      that are actually needed.  At the same time, it will be
+      necessary to continue to use something like a public suffix list
+      for some important classes of behaviour (both to achieve
+      acceptable performance characteristics and to deal with deployed
+      software).  Therefore, the proposal below does not attempt to
+      address all the issues in <xref
+      target="I-D.sullivan-dbound-problem-statement" />, but offers a
+      way to solve one important class of problems -- the "orphan
+      type" policies.</t>
+
+      <section title="Organization of This Memo" anchor="sec_org">
+        <t><cref source="ajs@anvilwalrusden.com">I find this section
+        awkward here.  Ditch it?</cref></t>
+        <t>Necessary terminology is established in <xref
+        target="sec_terms" />.  <xref target="sec_overview" />
+        provides an overview of what the mechanism is supposed to do.
+        Then, <xref target="sec_usecases" /> discusses the conditions
+        where the technique outlined here may be useful, and notes
+        some cases that the technique is not intended solve.  A
+        definition of a new RRTYPE to support the technique is in
+        <xref target="sec_rrdef" />.  There is some discussion of the
+        use of the RRTYPE in <xref target="sec_rruse" />.  <xref
+        target="sec_utility" /> attempts to show how the mechanism is
+        generally useful.  Then, <xref target="sec_eg" /> offers an
+        example portion of a DNS tree in an effort to illustrate how
+        the mechanism can be useful in certain example scenarios.  <xref
+        target="sec_limitations" /> notes some limitations of the
+        mechanism.  <xref target="sec_security" /> outlines how the
+        mechanism might be used securely, and <xref target="sec_i18n"
+        /> addresses the internationalization consequences of the SOPA
+        record.  Finally, <xref target="sec_iana" /> includes the
+        requests to IANA for registration.</t>
+      </section>
+    </section>
+
+
+    <section title="Terminology" anchor="sec_terms">
+
+      <t>The reader is assumed to be familiar with the DNS (<xref
+      target="RFC1034" /> <xref target="RFC1035"
+      />) and the Domain Name System Security Extensions (DNSSEC) (<xref
+      target="RFC4033"  /> <xref target="RFC4034"  /> <xref
+      target="RFC4035"  /> <xref target="RFC5155"
+       />).  A number of DNS terms can be found in <xref
+       target="RFC7719" />.</t>
+
+      <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+      NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+      "OPTIONAL" in this document are to be interpreted as described
+      in <xref target="RFC2119" />.</t>
+
+      <t>The terms "policy realm" and "policy authority" are defined
+      in <xref target="I-D.sullivan-dbound-problem-statement" />.  For
+      the purposes of discussion here, it is important to remember
+      that it is a matter of fact as to whether two domains lie in the
+      same policy realm.  The point of the mechanism here is not to
+      create such facts, but merely to expose them.  The terms
+      "inheritance type" and "orphan type" are also defined in <xref
+      target="I-D.sullivan-dbound-problem-statement" />.  The text
+      below attempts to apply the categories when they seem
+      useful.</t>
+      
+    </section>
+
+    <section title="Overview of Start Of Policy Authority (SOPA)"
+             anchor="sec_overview">
+      <t>When an application is attempting to make security decisions
+      based on domain names, it needs to answer questions about the
+      relation between those names.  Suppose that the question to be
+      answered is, "Given any two domain names, do they lie in the
+      same policy realm appropriate for a given application?"  In
+      order to answer this, there are two pieces of information
+      needed: first, does the application need an inheritance or
+      orphan type of policy?  Second do the two names lie in the same
+      policy realm?  For orphan types of policy, the best way to
+      determine whether two names lie in the same policy realm is to
+      look for assertions about the two domain names.  A good place to
+      look for assertions about domain names is in the DNS.</t>
+      
+      <t>This memo presents a way to assert that two domains lie in
+      the same policy realm by placing a resource record (RR) at the
+      affected domain names in the DNS.  The mechanism requires a new
+      resource record type (RRTYPE).  It is called SOPA, for "Start Of
+      Policy Authority" and echoing the Start Of Authority or SOA
+      record.  While there are reported difficulties in deploying new
+      RRTYPEs, the only RRTYPE that could be used to express all the
+      necessary variables is the TXT record, and it is unsuitable
+      because it can also be used for other purposes (so it needs to
+      be covered itself).  The use of this mechanism does not require
+      "underscore labels" to scope the interpretation of the RR, in
+      order to make it possible to use the mechanism where the
+      underscore label convention is already in use.  The SOPA RRTYPE
+      is class-independent.</t>
+
+      <t>The use of SOPA records can do one of two things: it can
+      confirm that two names are in the same policy realm, or it can
+      refute a claim that they are.  In order to learn whether
+      a.long.example.com and b.example.com are in the same policy
+      realm, perform a DNS query for the SOPA record for
+      a.long.example.com.  If the answer's RDATA contains
+      b.example.com, that is an assertion from the nameservers for
+      a.long.example.com that it is in the same policy realm as
+      b.example.com.  Next, make a DNS query for the SOPA record for
+      b.example.com.  If the answer's RDATA contains
+      a.long.example.com, then the two names are in the same policy
+      realm.  A positive policy realm relationship ought to be
+      symmetric: if example.com is in the same policy realm as
+      example.net, then example.net should be (it would seem) in the
+      same policy realm as example.com.  In principle, then, if a SOPA
+      RR at a.long.example.com provides a target at b.example.com,
+      there should be a complementary SOPA RR at b.example.com with a
+      target of a.long.example.com.  Because of the distributed nature
+      of the DNS, and because other DNS administrative divisions need
+      not be congruent to policy realms, the only way to know whether
+      two domain names are in the same policy realm is to query at
+      each domain name, and to correlate the responses.  If any of the
+      forgoing conditions fails, then the two names are not in the
+      same policy realm.</t>
+
+      <t><cref source="ajs@anvilwalrusden.com">Something that could be
+      useful here is a transitivity bit in the SOPA record.  That
+      would allow SOPAs between a.example.com and example.com, and
+      b.example.com and example.com, to mean that a.example.com and
+      b.example.com are also in the same realm (but you could shut it
+      off by clearing the bit).  I'm leery of this because of the
+      potential for abuse and also because I doubt it saves very
+      much.  Might be useful for administrative saving, but it won't
+      save lookups.</cref></t>
+
+      <t>It is also possible for a SOPA record to contain the explicit
+      statement that other names do not lie in the same policy
+      authority as it.  This negative assertion permits processing to
+      stop.  If the assertion is about all other names, then the
+      capability is functionally equivalent to declaring a name to be
+      a public suffix.</t>
+
+      <t>In operation where latency is an important consideration
+      (such as in a web browser), it is anticipated that the above
+      correlations could happen in advance of the user connection
+      (that is, roughly the way the existing public suffix list is
+      compiled), and then additional queries could be undertaken
+      opportunistically.  This would allow the detection of changes in
+      operational policy and make maintenance of the installed list
+      somewhat easier, but not require additional DNS lookups while a
+      user is waiting for interaction.</t>
+      
+      <t>While many policies of the sort discussed in <xref
+      target="I-D.sullivan-dbound-problem-statement" /> appear to be
+      based on domain names, they are actually often only partly based
+      on them.  Often, there are implicit rules that stem from
+      associated components of composite names such as URIs <xref
+      target="RFC3986"/>, e.g., the destination port <xref
+      target="RFC6335"/> or URI scheme <xref target="RFC4395"/> (or
+      both).  It is possible to make those assumptions explicit, but
+      at the cost of expressing in the resulting resource record a
+      tighter relationship between the DNS and the services offered at
+      domain names.  SRV <xref target="RFC2782" /> records offer a
+      mechanism for expressing such relationships, and a SOPA record
+      in conjunction with an SRV record appears to provide the
+      necessary mechanism to express such relationships.  (SRV records
+      use underscore labels, and this is an example of why underscore
+      labels themselves need to be coverable by SOPA records.)</t>
+      
+      <section title="Identifying a Target Name for Policy
+                      Authority" anchor="sec_nameonly">
+
+        <t>The RDATA of a SOPA RR contains a "target name" that either
+        lies in the same policy realm as the owner name of the RR, or
+        that lies outside of that policy realm.  The SOPA record is
+        therefore an assertion, on the part of the authoritative DNS
+        server for the given owner name, that there is some policy
+        relationship between the owner name and the target name.  If a
+        given owner name lies in the same policy realm as several
+        other target names, an additional RR is necessary for each
+        such relationship, with one exception.  It is not uncommon for
+        a name to have policy relationships with all the children
+        beneath it.  Using the SOPA RR, it is possible to specify
+        that the policy target is all the names beneath a given owner
+        name, by using a wildcard target.</t>
+
+      </section>
+
+    </section>
+
+    
+    <section title="Use Cases" anchor="sec_usecases">
+
+      <t>In the most general sense, this memo presents a mechanism
+      that can be used either as a replacement of the public suffix
+      list <eref target="publicsuffix.org"/>, or else as a way to
+      build and maintain such a list.  Performance characteristics may
+      make the mechanism impractical as a full replacement, in which
+      case a list will likely need to be built and maintained.  In the
+      latter case, this mechanism is still preferable because it
+      aligns the policy assertions with the operation of the domains
+      themselves, and allows maintenance to be distributed in much the
+      way the operation of the DNS is (instead of being centralized).</t>
+
+      <t>It is worth noting that the mechanism outlined here could be
+      used for names that are not along the same branch of the DNS
+      tree (i.e. it could permit the statement that the policy
+      authority of some.example.com and some.other.example.net is the
+      same).  Such uses are unlikely to work in practice and probably
+      should not be used for general purposes.  Most deployed code
+      implicitly uses ancestor-descendent relations as part of
+      understanding the policy, and such code will undoubtedly ignore
+      cross-tree dependencies.  <cref
+      source="ajs@anvilwalrusden.com">This relaxes a restriction that
+      was in previous versions, which officially specified the use
+      only for ancestor-descendent uses.  It seems better to make that
+      a deployment consideration so that the restriction could be
+      relaxed in some circumstances where it would be
+      appropriate.</cref></t>
+
+      <t>By and large, the mechanism is best suited to "orphan" types
+      of policy.  Where inheritance types of policy can use this, it is
+      mostly by treating the mechanism as a generator for public
+      suffix boundaries.</t>
+
+      <section title="Where SOPA Works Well" anchor="sec_goodcases">
+      <t>
+        
+        <list style="hanging">
+          <t hangText="HTTP state management cookies">
+            The mechanism can be used to determine the scope for data
+            sharing of HTTP state management cookies <xref
+            target="RFC6265" />.  Using this mechanism, it is possible
+            to determine whether a service at one name may be
+            permitted to set a cookie for a service at a different
+            name.  (Other protocols use cookies, too, and those
+            approaches could benefit similarly.)  Because handling of
+            state management cookies often happens during user
+            interaction, this use case probably requires a cached copy
+            of the relevant list.  In that case, the mechanism can be
+            used to maintain the list.</t>
+
+            <t hangText="User interface indicators">
+              User interfaces sometimes attempt to indicate the "real"
+              domain name in a given domain name.  A common use is to
+              highlight the portion of the domain name believed to be
+              the "real" name -- usually the rightmost three or four
+              labels in a domain name string.  This has similar
+              performance needs as HTTP state management cookies.
+              </t>
+
+              <t hangText="Setting the document.domain property">
+                The DOM same-origin policy might be helped by being
+                able to identify a common policy realm.  This case
+                again has a need for speedy determination of the
+                appropriate policy and would benefit from a cached
+                list.  It is likely that the SOPA record on its own is
+                inadequate for this case, but the combination of SOPA
+                and SRV records might be helpful.</t>
+
+              <t hangText="SSL and TLS certificates">Certificate
+              authorities need to be able to discover
+              delegation-centric domains in order to avoid issuance of
+              certificates at or above those domains.  More generally,
+              a CA needs to decide whether, given a request, it should
+              sign a particular domain.  This can be especially tricky
+              in the case of wildcards. </t>
+
+              <t hangText="HSTS and Public Key Pinning with
+              includeSubDomains flag set"> Clients that are using HSTS
+              and public key pinning using includeSubDomains need to
+              be able to determine whether a subdomain is properly
+              within the policy realm of the parent.  An application
+              performing this operation must answer the question,
+              "Should I accept the rules for using X as valid for
+              Y.X?"  This use case sounds like an inheritance type,
+              but it is in fact an orphan type.
+              </t>
+
+              <t hangText="Linking domains together for reporting
+              purposes">It can be useful when preparing reports to be
+              able to count different domains as "the same thing".
+              This is an example where special use of SOPA even across
+              the DNS tree could be helpful.
+          </t>
+
+        </list>
+      </t>
+      </section>
+
+      <section title="Where SOPA Works Less Well"
+                   anchor="sec_badcases">
+        <t><list style="hanging">
+                
+              <t hangText="Email authentication mechanisms">Mail
+              authentication mechanisms such as DMARC <xref
+              target="RFC7489" /> need to be able to find policy
+              documents for a domain name given a subdomain.  This use
+              case is an inheritance type.  Because the point of
+              mechanisms like DMARC is to prevent abuse, it is not
+              possible to rely on the candidate owner name to report
+              accurately its policy relationships.  But some ancestor
+              is possibly willing to make assertions about the policy
+              under which that ancestor permits names in the name
+              space.  This sort of case can only use SOPA indirectly,
+              via a static list that is composed over time by SOPA
+              queries.  Other mechanisms will likely better satisfy
+              this need.</t>
+
+        </list>
+      </t>
+      </section>
+    </section>
+
+    <section title="The SOPA Resource Record" anchor="sec_rrdef">
+      <t>The SOPA resource record, type number [TBD1], contains two
+      fields in its RDATA:
+
+        <list style="hanging" hangIndent="12">
+          <t hangText="Relation:">
+            A one-octet field used to indicate the
+            relationship between the owner name and the target.  
+          </t>
+
+        <t hangText="Target:">
+            A field used to contain a fully-qualified domain name that
+            is in some relationship with the owner name.  This field
+            is a maximum of 255 octets long, to match the possible
+            length of a fully-qualified domain name.
+          </t>
+        </list>
+      </t>
+
+      <figure anchor="wiredia">
+        <artwork><![CDATA[
+                        1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |   Relation    |                                               /
+   +-+-+-+-+-+-+-+-+                                               /
+   /                            Target                             /
+   /                                                               /
+   /                                                               /
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   ]]></artwork>
+      </figure>
+
+      <section title="The Relation Field" anchor="sec_relnf">
+        <t>The relation field is REQUIRED and 
+          contains an indicator of the relationship
+        between the owner name and the target name.  This memo specifies
+        two possible values:</t>
+
+        <texttable anchor="relnvals">
+          <ttcol align="left">Value</ttcol>
+          <ttcol align="left">Setting</ttcol>
+          <ttcol align="left">Meaning</ttcol>
+
+          <c>0</c>
+
+          <c>Excluded</c>
+
+          <c>The target is not in the same policy realm as the owner
+          name</c>
+
+          <c>1</c>
+
+          <c>Included</c>
+
+          <c>The target is in the same policy realm as the owner
+          name</c>
+
+        </texttable>
+
+        <t>Additional values may be defined in future, according to
+        the rules set out in <xref target="sec_iana" />.</t>
+        
+      </section>
+
+      <section title="The Target Field" anchor="sec_targetf">
+        <t>
+          The target field contains a fully-qualified domain name, and
+          is REQUIRED to be populated.  The name MUST be a domain name
+          according to the rules in <xref target="RFC1034" /> and
+          <xref target="RFC1035" />, except that the any label of the
+          target MAY be the wildcard character ("*"; further
+          discussion of wildcards is in <xref target="sec_specials"
+          />).  The target MUST be sent in uncompressed form <xref
+          target="RFC1035" />, <xref target="RFC3597" />.  The target
+          MUST NOT be an alias <xref target="RFC2181" />, such as the
+          owner name of a CNAME RR <xref target="RFC1034" />, DNAME RR
+          <xref target="RFC6672" />, or other similar such resource
+          records.  Note that this is a fully-qualified domain name,
+          so the trailing null label is required.  <cref
+          source="ajs@anvilwalrusden.com">This is a change from
+          previous versions; previously, the target was a
+          root-relative domain name.  So it's now example.com. and
+          used to be example.com (no trailing dot) when in
+          presentation format.  The new form makes this a domain name,
+          whereas before it could really have been a text field.  Not
+          sure which is better. </cref>
+
+        </t>
+        
+        <t>The target name SHOULD be either an ancestor, a descendent,
+        or a sibling of the owner name in the record.  This
+        requirement is intended to limit the applicability of the SOPA
+        RR to names in the same DNS hierarchy, thereby avoiding
+        possible negative side effects of unbounded linkages across
+        disparate DNS subtrees, including those subtrees rooted close
+        to, or immediately below, the DNS root.  In special uses,
+        however, it may be desirable to link across the DNS tree.
+        General-purpose clients MAY ignore target names that are
+        neither an ancestor, nor a descendent, nor a sibling of the
+        owner name in the record (and abort processing)
+        in order to avoid the aforementioned negative
+        side-effects.</t>
+
+        <t>Targets MAY contain any series of octets, in order to
+        accommodate labels other than LDH labels <xref
+        target="RFC6365" />.  No processing of labels prior to
+        matching targets is to be expected, however, and therefore
+        internationalized domain name targets use whatever form they
+        appear in the DNS.  In particular, IDNA labels <xref
+        target="RFC5890" />, <xref target="RFC5891" />, <xref
+        target="RFC5892" />, <xref target="RFC5893" />, <xref
+        target="RFC5894" /> SHOULD appear in A-label form.  A
+        SOPA-using client that receives a target containing octets
+        outside LDH MUST NOT treat the affected labels as U-labels,
+        because there is no way to discover whether the affected label
+        is encoded as UTF-8 or something else.</t>
+        
+      </section>
+    </section>
+
+
+    <section title="Expressing Different Policies with the SOPA RRTYPE"
+             anchor="sec_rruse">
+
+      <t>A SOPA RR has one of three different functions.  The
+      first is to claim that two domain names are not in the same policy
+      realm ("exclusion").  The second is to claim that two domain names
+      are in the same policy realm ("inclusion").  In both of these
+      cases, it is possible to make the assertion over groups of DNS
+      names.  </t>
+
+      <t>The third function describes a portion of the tree that
+      would be covered by targets containing a wildcard, but where the
+      policy is the opposite of that expressed with the wildcard.
+      This is expressed simply by including the relevant specific
+      exception.  For example, all the subdomains under example.com
+      could be indicated in a target "*.example.com".  To express a
+      different policy for exception.example.com than for the rest of
+      the names under example.com requires two SOPA RRs, one with the
+      target "*.example.com" and the other with the target
+      "exception.example.com".  The most-specific match to a target
+      always wins.</t>
+
+      <t>Is is important to note that the default setting is
+      "exclusion".  A domain name does not lie in any other name's
+      policy realm unless there is an explicit statement by
+      appropriate SOPA resource record(s) to the contrary.  If a
+      candidate name does not appear in the target of any SOPA record
+      for some owner name, then that candidate target does not lie in
+      the same policy realm as that owner name.</t>
+
+      <t>It is acceptable for there to be more than one SOPA resource
+      record per owner name in a response.  Each RR in the returned
+      RRset is treated as a separate policy statement about the
+      original queried name (QNAME).  Note, however, that the QNAME
+      might not be the owner name of the SOPA RR: if the QNAME is an
+      alias, then the actual SOPA owner name in the DNS database will
+      be different than the QNAME.  In other words, even though a SOPA
+      target field is not allowed to be an an alias, when resolving
+      the SOPA RR aliases are followed; and SOPA records are accepted
+      transitively from the canonical name back to the QNAME.</t>
+
+      <section title="The Exclusion Relation" anchor="sec_rel_exclude">
+
+        <t>A SOPA record where the relation field has value 0 states
+        that the owner name and the target name are not in the same
+        policy realm.  While this might seem useless (given the
+        default of exclude), a SOPA record with a relation field value
+        of 0 can be useful in combination with a long TTL field, in
+        order to ensure long term caching of the policy.
+        </t>
+
+        <t> In addition, an important function of SOPA is to enable
+        the explicit assertion that no other name lies in the same
+        policy realm as the owner name (or, what is equivalent, that
+        the owner name should be treated as a public suffix).  In
+        order to achieve this, the operator of the zone may use a
+        wildcard target together with a relation field value of 0.
+
+          See <xref target="sec_specials" />.  
+          </t>
+        <t>
+          In addition,
+        an more-specific target can be used to override a more general
+        target (i.e. with a wildcard in the target) at the
+        same owner name.  For example,
+      </t>
+
+        <figure>
+          <artwork>
+      example.tld   86400 IN    SOPA  0  *.example.tld
+
+      example.tld   86400 IN    SOPA  1  www.example.tld
+          </artwork>
+        </figure>
+
+        <t>A SOPA-using client that receives a SOPA resource record
+        with a relation value of 0 MUST treat the owner name and the target
+        name as lying in different policy realms.</t>
+      </section>
+
+      <section title="The Inclusion Relation" anchor="sec_rel_include">
+       
+        <t>A SOPA record with a relation field set to 1 is an
+        indicator that the target name lies in the same policy realm
+        as the owner name.  In order to limit the scope of security
+        implications, the target name and the owner name SHOULD stand in
+        some ancestor-descendant or sibling relationship to one
+        another.  A SOPA-using client that is not prepared for
+        inclusion relationships outside the same branch of the DNS MAY
+        ignore such relationships and treat them as though they did
+        not exist.</t>
+
+        <t>The left-most label of a target may be a wildcard record,
+        in order to indicate that all descendant or sibling names lie
+        in the same policy realm as the owner name.  See <xref
+        target="sec_specials" />.</t>
+
+        <t>A SOPA-using client that receives a SOPA resource record
+        where relation is set to 1 SHOULD treat the owner name and the
+        target name as lying in the same policy realm.  If a client
+        does not, it is likely to experience unexpected failures
+        because the client's policy expectations are not aligned with
+        those of the service operator.</t>
+      </section>
+
+      <section title="Interpreting DNS Responses" anchor="sec_dnsresp">
+
+        <t>There are three possible responses to a query for the SOPA
+        RRTYPE at an owner name that are relevant to determining the
+        policy realm.  The first is Name Error (RCODE=3, also known as
+        NXDOMAIN).  In this case, the owner name itself does not
+        exist, and no further processing is needed.</t>
+
+        <t>The second is a No Data response <xref target="RFC2308" />
+        of any type.  The No Data response means that the owner name
+        in the QNAME does not recognize any other name as part of a
+        common policy realm.  That is, a No Data response is to be
+        interpreted as though there were a SOPA resource record with
+        relation value 0 and a wildcard target.  The TTL on the policy
+        in this case is the negative TTL from the SOA record, in case
+        it is available.</t>
+
+        <t>The final is a response with one or more SOPA resource
+        records in the Answer section.  Each SOPA resource record
+        asserts a relationship between the owner name and the target
+        name, according to the functions of the SOPA RRTYPE outlined
+        above.</t>
+
+        <t>Any other response is no different from any other sort of
+        response from the DNS, and is not in itself meaningful for
+        determining the policy realm of a name (though it might be
+        meaningful for finding the SOPA record).</t>
+      </section>
+
+      <section title="Wildcards in Targets" anchor="sec_specials">
+
+        <t>The special character "*" in the target field is used to
+        match any label, but not according to the wildcard label rules
+        in section 4.3.3 of <xref target="RFC1034" />.  Note that,
+        because of the way wildcards work in the DNS, is it not
+        possible to place a restriction to the left of a wildcard; so,
+        for instance, example.*.example.com. does not work.  In a SOPA
+        target, it is possible to place such a restriction.  In such
+        use, a wildcard label matches exactly one label:
+        example.*.example.com. matches the target
+        example.foo.example.com. and example.bar.example.com., but not
+        example.foo.bar.example.com.  To match the latter, it would be
+        necessary also to include example.*.*.example.com, which is
+        also permitted in a target. This use of the wildcard is
+        consistent with the use in <eref
+        target="https://publicsuffix.org/list/" />.</t>
+
+        <t>If a SOPA target's first label is a wildcard label, the
+        wildcard then matches any number of labels.  Therefore, a
+        target of *.example.com. matches both
+        onelabel.example.com. and two.labels.example.com.; the second
+        match would not be a match in the DNS.  This use of the
+        wildcard label does not match the public suffix list, but is
+        included for brevity of RRsets for certain presumed-common
+        cases.  This rule is subject to more-specific matching (as
+        discussed in <xref target="sec_rel_exclude" /> and <xref
+        target="sec_rel_include" />).  To simplify implementation,
+        more-specific matches cannot have internal wildcards as
+        described above.</t>
+
+        <t>The reason for these differences in wildcard-character
+        handling is because of the purpose of the wildcard character.
+        In DNS matching, processing happens label by label proceeding
+        down the tree, and the goal is to find a match.  But in the
+        case of SOPA, the candidate match is presumed available,
+        because the application would not perform a SOPA look up if
+        there were not a different target domain at hand.  Therefore,
+        strict conformance with the DNS semantics of the wildcard is
+        not necessary.  It is useful to be able to express potential
+        matches as briefly as possible, to keep DNS response sizes small.</t>
+
+        <t>Multiple leading wildcard labels (e.g. *.*.example.com.) is
+        an error.  An authoritative name server SHOULD NOT serve a
+        SOPA RR with erroneous wildcards when it is possible to
+        suppress them, and clients receiving such a SOPA RR MUST
+        discard the RR.  If the discarded RR is the last RR in the
+        answer section of the response, then the response is treated
+        as a No Data response.</t>
+
+        <t>It is possible for the wildcard label to be the only label
+        in the target name.  In this case, the target is "every
+        name".  This makes it trivial for an owner name to assert that
+        there are no other names in its policy realm.</t>
+
+        <t>Because it would be absurd for there to be more than one
+        SOPA RR with the same target (including wildcard target) in a
+        SOPA RRset, a server encountering more than one such target
+        SHOULD only serve the RR for the exclusion relation,
+        discarding others when possible.  Discarding other RRs in the
+        RRset is not possible when serving a signed RRset.  A client
+        receiving multiple wildcard targets in the RRset MUST use only
+        the RR with relation set to 0.</t>
+
+        <t>As already noted, when a SOPA RR with a wildcard target
+        appears in the same RRset as a SOPA RR with a target that
+        would be covered by the wildcard, the specific (non-wildcard)
+        RR expresses the policy for that specific owner name/target
+        pair.  This way, exceptions to a generic policy can be
+        expressed.</t>
+        </section>
+
+        <section title="TTLs and SOPA RRs" anchor="sec_ttl">
+          <t>The TTL field in the DNS is used to indicate the period
+          (in seconds) during which an RRset may be cached after first
+          encountering it (see <xref target="RFC1034" />).  As is
+          noted in <xref target="sec_usecases" />, however, SOPA RRs
+          could be used to build something like the public suffix
+          list, and that list would later be used by clients that
+          might not themselves have access to SOPA DNS RRsets.  In
+          order to support that use as reliably as possible, a SOPA RR
+          MAY continue to be used even after the TTL on the RRset has
+          passed, until the next time that a SOPA RRset from the DNS
+          for the owner name (or a No Data response) is available.  It
+          is preferable to fetch the more-current data in the DNS, and
+          therefore if such DNS responses are available, a SOPA-aware
+          client SHOULD use them.  Note that the extension of the TTL
+          when DNS records are not available does not extend to the
+          use of the negative TTL field from No Data responses.</t>
+        </section>
+      </section>
+
+      <section title="What Can be Done With a SOPA RR"
+               anchor="sec_utility">
+        <t>Use of a SOPA RR enables a site administrator to assert
+        or deny relationships between names.  By the same token, it
+        permits a a consuming client to detect these assertions and
+        denials.</t>
+        
+        <t>The use of SOPA RRs could either replace the public suffix
+        list or (often more likely due to some limitations -- see
+        <xref target="sec_limitations" />) simplify and automate the
+        management of the public suffix list.  A client could use the
+        responses to SOPA queries to refine its determinations about
+        http cookie Domain attributes.  In the absence of SOPA RRs at
+        both owner names, a client might treat a Domain attribute as
+        though it were omitted.  More generally, SOPA RRs would permit
+        additional steps similar to steps 4 and 5 in <xref
+        target="RFC6265" />.</t>
+        
+        <t>SOPA RRs might be valuable for certificate authorities when
+        issuing certificates, because it would allow them to check
+        whether two names are related in the way the party requesting
+        the certificate claims they are.</t>
+
+        <section title="Exclusion has Priority" anchor="sec_exclusionwins">
+          <t>In order to minimize the chance of policy associations
+          where none exist, this memo always assumes exclusion unless
+          there is an explicit policy for inclusion.  Therefore, a
+          client processing SOPA records can stop as soon as it
+          encounters an exclusion record: if a parent record excludes
+          a child record, it makes no difference whether the child
+          includes the parent in the policy realm, and conversely.  By
+          the same token, an inclusion SOPA record that specifies a
+          target, where the target does not publish a corresponding
+          inclusion SOPA record, is not effective.</t>
+        </section>
+      </section>
+        
+      <section title="An Example Case" anchor="sec_eg">
+
+      <t>For the purposes of discussion, it will be useful to
+      imagine a portion of the DNS, using the domain example.tld.  A
+      diagram of the tree of this portion is in <xref
+      target="sampletree" />.  In the example, the domain
+      example.tld includes several other names: www.example.tld,
+      account.example.tld, cust1.example.tld, cust2.example.tld,
+      test.example.tld, cust1.test.example.tld, and
+      cust2.test.example.tld.
+
+      <figure anchor="sampletree">
+        <artwork><![CDATA[
+                          tld
+                           |   
+                           |     
+                  ------example ----- 
+                 /     /   |  \      \
+                /     /    |   \      \
+               /   www  account \      cust2
+           test                  \
+          /   \                   cust1
+      cust1   cust2
+]]></artwork>
+      </figure></t>
+      
+      <t>In the example, the domain tld delegates the domain
+      example.tld.  There are other possible cut points in the
+      example, and depending on whether the cuts exist there may be
+      implications for the use of the examples.  See <xref
+      target="sec_worked" />, below.</t>
+      <t>The (admittedly artificial) example permits us to
+      distinguish a number of different roles.  To begin with, there
+      are three parties involved in the operation of services:
+      <list style="symbols">
+        <t>OperatorV, the operator of example.tld;</t>
+        <t>Operator1, the operator of cust1.example.tld;</t>
+        <t>Operator2, the operator of cust2.example.tld.</t>
+      </list></t>
+      <t>Since there are three parties, there are likely three
+      administrative boundaries as well; but the example contains
+      some others.  For instance, the names www.example.tld and
+      example.tld are in this case in the same policy realm.
+      By way of contrast, account.example.tld might be treated as
+      completely separate, because OperatorV might wish to ensure
+      that the accounts system is never permitted to share anything
+      with any other name.  By the same token, the names underneath
+      test.example.tld are actually the test-instance sites for
+      customers.  So cust1.test.example.tld might be in the same
+      policy realm as cust1.example.tld, but
+      test.example.tld is certainly not in the same administrative
+      realm as www.example.tld.</t>
+      <t>Finally, supposing that Operator1 and Operator2 merge their
+      operations, it seems that it would be useful for
+      cust1.example.tld and cust2.example.tld to lie in the same
+      policy realm, without including everything else in
+      example.tld.</t> 
+      
+      <section title="Examples of Using the SOPA Record for Determining
+                      Boundaries" anchor="sec_worked">
+
+        <t>This section provides some examples of different
+        configurations of the example tree in <xref target="sec_eg" />,
+        above.  The examples are not exhaustive, but may provide an
+        indication of what might be done with the mechanism.  </t>
+
+        <section title="Declaring a Public Suffix"
+                 anchor="sec_pubsuffsopa">
+          
+          <t>Perhaps the most important function of the SOPA RR is to
+          identify public suffixes.  In this example, the operator of
+          TLD publishes a single SOPA record:
+          <list style="empty">
+            <t>
+            </t>
+            <t>tld.              86400  IN  SOPA  0 *.</t>
+          </list></t>
+        </section>
+
+      
+        <section title="One Delegation, Eight Administrative
+                        Realms, Wildcard Exclusions" anchor="sec_sctn-18nu">
+          <t>In this scenario, the example portion of the domain name
+          space contains all and only the following SOPA records:
+          <list style="empty">
+            <t>
+            </t>
+            <t>example.tld.        86400   IN  SOPA  1 www.example.tld.</t>
+            <t>www.example.tld.    86400   IN  SOPA  1 example.tld.</t>
+          </list></t>
+          <t>Tld is the top-level domain, and has delegated
+          example.tld.  The operator of example.tld makes no
+          delegations.  There are four operators involved: the
+          operator of tld; OperatorV; Operator1, the operator of the
+          services at cust1.example.tld and cust1.test.example.tld;
+          and Operator2, the operator of the services at
+          cust2.example.tld and cust2.test.example.tld.</t>
+          <t>In this arrangement, example.tld and www.example.tld
+          positively claim to be within the same policy realm.
+          Every other name stands alone.  A query for an SOPA record
+          at any of those other names will result in a No Data
+          response, which means that none of them include any other
+          name in the same policy realm.  As a result, there
+          are eight separate policy realms in this case: tld,
+          {example.tld and www.example.tld}, test.example.tld,
+          cust1.test.example.tld, cust2.test.example.tld,
+          account.example.tld, cust1.example.tld, and cust2.example.tld.</t>
+        </section>
+        <section title="One Delegation, Eight Administrative
+          Realms, Exclusion Wildcards" anchor="sec_sctn-18u">
+          <t>This example mostly works the same way as the one in
+          Section <xref target="sec_sctn-18nu" />, but there is a slight
+          difference.  In this case, in addition to the records listed
+          in <xref target="sec_sctn-18nu" />, both tld and test.example.tld
+          publish exclusion of all names in their SOPA records:
+          <list style="empty">
+            <t>
+            </t>
+            <t>tld.                     86400  IN  SOPA  0 *.</t>
+            <t>test.example.tld.        86400  IN  SOPA  0 *.</t>
+          </list></t>
+
+          <t>The practical effect of this is largely the same as the
+          previous example, except that these expressions of policy
+          last (at least) 86,400 seconds instead of the length of time
+          on the negative TTL in the relevant SOA for the zone.  Many
+          zones have short negative TTLs because of expectations that
+          newly-added records will show up quickly.  This mechanism
+          permits such names to express their administrative isolation
+          for predictable minimum periods of time.  In addition,
+          because clients are permitted to retain these records during
+          periods when DNS service is not available, a client could go
+          offline for several weeks, and return to service with the
+          presumption that test.example.tld is still not in any policy
+          realm with any other name.</t>
+        </section>
+        <!-- this one isn't recommended any more, so we leave it out.
+        <section title="Two Delegations, Seven or Eight Policy Realms,
+          Exclusion Wildcards" anchor="sec_sctn-27v8u">
+          <t>In this scenario, example.tld delegates the name
+          test.example.tld.  In this case, in addition to the SOPA
+          record at test.example.tld, there is an SOA record for
+          test.example.tld.  So, there are the same SOPA records as
+          in <xref target="sctn-18u" />.  The addition of the SOA record
+          for test.example.tld does not affect the relationship
+          between test.example.tld and example.tld.  At this point,
+          there are eight policy realms.</t>
+          <t>Next, the Operator1 determines that it is safe to treat
+          the test instance and production instance as being in the
+          same policy realm.  To begin with, Operator1 asks
+          OperatorV to add the following record to the
+          test.example.tld zone:
+          <list style="empty">
+            <t>
+            </t>
+            <t>cust1.test.example.tld  86400   IN  SOPA 1 cust1.example.tld</t>
+          </list></t>
+
+          <t>This arrangement is not complete yet.  Until a record is
+          also added at cust1.example.tld, Operator1's intention
+          is only half fulfilled.  The service at
+          cust1.test.example.tld treats cust1.example.tld as part of
+          a common policy realm, but the converse is not the
+          case.  <cref source="ajs@anvilwalrusden.com">I can't decide
+          whether there's anything useful in this configuration.
+          Thoughts?  I also can't decide whether this is still 8 admin
+          realms, 7 admin realms but broken, or 7 admin realms from
+          one perspective and 8 from another.  Also, at the moment as
+          the previous restriction was listed, this case is strictly
+          not permitted.  cust1.test.example.tld and cust1.example.tld
+          are not siblings and also not ancestors/descendents.  Is
+          this scenario ok to restrict?</cref></t>
+          <t>To complete the process, Operator1 asks OperatorV to add
+          the following record to the example.tld zone:
+          <list style="empty">
+            <t>
+            </t>
+            <t>cust1.example.tld  86400   IN  SOPA 1 cust1.test.example.tld</t>
+          </list></t>
+
+          <t>Once this is complete, both names treat the other as part
+          of the same policy realm.  In the end, the example
+          segment of the DNS expresses the following seven
+          policy realms: tld, {example.tld, www.example.tld},
+          test.example.tld, {cust1.test.example.tld,
+          cust1.example.tld}, cust2.example.tld, account.example.tld,
+          cust2.test.example.tld.</t>
+        </section> -->
+      </section>
+    </section>
+
+    <section title="Limitations of the approach and other considerations" anchor="sec_limitations">
+      <t>There are four significant problems with this proposal, all
+      of which are related to using DNS to deliver the data.</t>
+      <t>The first is that new DNS RRTYPEs are difficult to deploy.
+      While adding a new RRTYPE is straightforward, many provisioning
+      systems do not have the necessary support and some firewalls and
+      other edge systems continue to filter RRTYPEs they do not
+      know.  This is yet another reason why this mechanism is likely
+      to be initially more useful for constructing and maintaining the
+      public suffix list than for real-time queries.</t>
+      <t>The second is that it is difficult for an application to
+      obtain data from the DNS.  The TTL on an RRset, in particular,
+      is usually not available to an application, even if the
+      application uses the facilities of the operating system to
+      deliver other parts of an unknown RRTYPE.</t>
+      <t>The third, which is mostly a consequence of the above two, is
+      that there is a significant barrier to adoption: until browsers
+      have mostly all implemented this, operations need to proceed as
+      though nobody has.  But browsers will need to support two
+      mechanisms for some period of time if they are to implement this
+      mechanism at all, and they are unlikely to want to do that.
+      This may mean that there is no reason to implement, which also
+      means no reason to deploy.  This is made worse because, to be
+      safe, the mechanism really needs DNSSEC, and performing DNSSEC
+      validation at end points is still an unusual thing to do.  This
+      limitation may not be as severe for use-cases that are directed
+      higher in the network (such as using this mechanism as an
+      automatic feed to keep the public suffix list updated, or for
+      the use of CAs when issuing certificates).  This limitation could
+      be reduced by using SOPA records to maintain something like the
+      current public suffix list in an automatic fashion.</t>
+      <t>Fourth, in many environments the system hosting the
+      application has only proxied access to the Internet, and cannot
+      query the DNS directly.  It is not clear how such clients could
+      ever possibly retrieve the SOPA record for a name.</t>
+
+      <section title="Handling truncation" anchor="sec_truncation">
+        <t>It is possible to put enough SOPA records into a zone such
+        that the resulting response will exceed DNS or UDP protocol
+        limits.  In such cases, a UDP DNS response will arrive with
+        the TC (truncation) bit set.  A SOPA response with the TC bit
+        must be queried again in order to retrieve a complete
+        response, generally using TCP.  This increases the cost of the
+        query, increases the time to being able to use the answer, and
+        may not work at all in networks where administrators
+        mistakenly block port 53 using TCP.</t>
+      </section>
+
+    </section>
+    <section title="Security Considerations" anchor="sec_security">
+      <t>This mechanism enables publication of assertions about
+      administrative relationships of different DNS-named systems on
+      the Internet.  If such assertions are accepted without checking
+      that both sides agree to the assertion, it would be possible for
+      one site to become an illegitimate source for data to be
+      consumed in some other site.  In general, assertions about
+      another name should never be accepted without querying the other
+      name for agreement.</t>
+      <t>Undertaking any of the inferences suggested in this draft
+      without the use of the DNS Security Extensions exposes the user
+      to the possibility of forged DNS responses.</t>
+    </section>
+    <section title="Internationalization Considerations"
+             anchor="sec_i18n">
+      <t>There is some discussion of how to treat targets that appear
+      to have internationalized data in <xref target="sec_targetf"
+      />.  Otherwise, this memo raises no internationalization
+      considerations. </t>
+    </section>
+    <section title="IANA Considerations" anchor="sec_iana">
+      <t>IANA will be requested to register the SOPA RRTYPE if this
+      proceeds.</t>
+      <t>IANA will be requested to create a SOPA relation registry if
+      this proceeds.  The initial values are to be found in the table
+      in <xref target="sec_relnf" />.  Registration rules should
+      require a high bar, because it's a one-octet field.  Maybe RFC
+      required?</t>
+    </section>
+    <section title="Acknowledgements">
+      <t>The authors thank Adam Barth, Dave Crocker, Brian Dickson,
+      Phillip Hallam-Baker, John Klensin, Murray Kucherawy, John
+      Levine, Gervase Markham, Patrick McManus, Henrik Nordstrom,
+      Yngve N. Pettersen, Eric Rescorla, Thomas Roessler, Peter
+      Saint-Andre, and Maciej Stachowiak for helpful comments. </t>
+    </section>
+   </middle>
+  <back>
+
+    <references title="Normative References">
+      <?rfc include="reference.RFC.2119.xml"?>
+    </references>
+    <references title="Informative References">
+      <?rfc include="reference.I-D.sullivan-dbound-problem-statement.xml"?>
+      <?rfc include="reference.RFC.1034.xml"?>
+      <?rfc include="reference.RFC.1035.xml"?>
+      <?rfc include="reference.RFC.2181.xml"?>
+      <?rfc include="reference.RFC.2308.xml"?>
+      <?rfc include="reference.RFC.2782.xml"?>
+      <?rfc include="reference.RFC.3597.xml"?>
+      <?rfc include="reference.RFC.3986.xml"?>
+      <?rfc include="reference.RFC.4033.xml"?>
+      <?rfc include="reference.RFC.4034.xml"?>
+      <?rfc include="reference.RFC.4035.xml"?>
+      <?rfc include="reference.RFC.4395.xml"?>
+      <?rfc include="reference.RFC.5155.xml"?>
+      <?rfc include="reference.RFC.5890.xml"?>
+      <?rfc include="reference.RFC.5891.xml"?>
+      <?rfc include="reference.RFC.5892.xml"?>
+      <?rfc include="reference.RFC.5893.xml"?>
+      <?rfc include="reference.RFC.5894.xml"?>
+      <?rfc include="reference.RFC.6265.xml"?>
+      <?rfc include="reference.RFC.6335.xml"?>
+      <?rfc include="reference.RFC.6365.xml"?>
+      <?rfc include="reference.RFC.6672.xml"?>
+      <?rfc include="reference.RFC.7489.xml"?>
+      <?rfc include="reference.RFC.7719.xml"?>
+    
+    </references>
+
+    <section title="Discussion Venue">
+      <t>This Internet-Draft is discussed in the dbound working group: dbound@ietf.org.</t>
+    </section>
+
+    <section title="Change History">
+      <t><list style="hanging">
+        <t hangText="00 to 01:">
+          <list style="symbols">
+            <t>Changed the mnemonic from BOUND to AREALM</t>
+            <t>Added ports and scheme to the RRTYPE</t>
+            <t>Added some motivating text and suggestions about what
+            can be done with the new RRTYPE</t>
+            <t>Removed use of "origin" term, because it was
+            confusing.  The document filename preserves "origin" in the
+            name in order that the tracker doesn't lose the change
+            history, but that's just a vestige.</t>
+            <t>Removed references to cross-document information
+            sharing and ECMAScript.  I don't understand the issues
+            there, but Maciej Stachowiak convinced me that they're
+            different enough that this mechanism probably won't work.</t>
+            <t>Attempted to respond to all comments received.  Thanks
+            to the commenters; omissions and errors are mine.</t>
+          </list>
+        </t>
+        <t hangText="01 to 02:">
+          <list style="symbols">
+            <t>Changed mnemonic again, from AREALM to SOPA.  This in
+            response to observation by John Klensin that anything
+            using "administrative" risks confusion with the standard
+            administrative boundary language of zone cuts.</t>
+            <t>Add discussion of two strategies: name-only or
+            scheme-and-port.</t>
+            <t>Increase prominence of utility to CAs.  This use
+            emerged in last IETF meeting.</t>
+        </list></t>
+        <t hangText="02 to 03:">
+           <list style="symbols">
+             <t>Removed discussion of scheme-and-port, which was
+             confusing.</t>
+             <t>Add inclusion/exclusion/exception approach in response
+             to comment by Phill H-B.</t>
+             <t>Change mechanism for indicating "no others" to a
+             wildcard mechanism.</t>
+             <t>Added better discussion of use cases</t>
+           </list>
+        </t>
+        <t hangText="03 to 00:">
+          <list style="symbols">
+            <t>Renamed file to get rid of "origin", which caused
+            confusion.</t>
+            <t>Added Jeff as co-author</t>
+            <t>Remove exception relation; instead, more than one RR is
+            allowed.</t>
+            <t>Added discussion of SRV records</t>
+          </list>
+        </t>
+        <t hangText="00 to 01:">
+          <list style="symbols">
+            <t>Failed to include change control entry</t>
+            <t>Modest rearrangement of text, little improvement</t>
+          </list>
+        </t>
+        <t hangText="01 to 02:">
+          <list style="symbols">
+            <t>Significant rearrangement of sections</t>
+            <t>Large removal of text (moved to problem statement
+            document)</t>
+            <t>Considerably more detail in specification, including
+            more rigorous description of RRTYPE</t>
+            <t>Altered handling of wildcard targets</t>
+            <t>Attempt to improve overview to make it plainer what the
+            system does</t>
+            <t>Clarify what use cases really work</t>
+            <t>Reversion to permit cross-tree use, with deployment
+            warnings that it won't be useful</t>
+          </list>
+        </t>                
+      </list></t>
+    </section>
+  </back>
+</rfc>
+
+
+<!-- PLEASE DO NOT DELETE!!! The below is used by XEmacs XML major-mode -->
+<!--
+Local Variables:
+mode: xml
+indent-tabs-mode:nil
+sgml-omittag:t
+sgml-shorttag:t
+sgml-namecase-general:t
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:2
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->
+<!-- PLEASE DO NOT DELETE!!! The above is used by XEmacs XML major-mode -->
+
