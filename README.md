@@ -20,7 +20,6 @@ The most recent versions of the internet-drafts associated with the dbound WG ar
 <br>
 
   - specification I-Ds:
-<br>
 
   - https://tools.ietf.org/html/draft-sullivan-domain-policy-authority
 
@@ -36,5 +35,5 @@ The most recent versions of the internet-drafts associated with the dbound WG ar
 The above docs, other than draft-sullivan-domain-policy-authority, can be located via this search:
 <br>
 
-https://datatracker.ietf.org/doc/search?name=dbound&sort=&rfcs=on&activedrafts=on&olddrafts=on&author=&by=group&group=&area=&ad=&state=&substate=&irtfstate=&stream=
+- https://datatracker.ietf.org/doc/search?name=dbound&sort=&rfcs=on&activedrafts=on&olddrafts=on&author=&by=group&group=&area=&ad=&state=&substate=&irtfstate=&stream=
 
